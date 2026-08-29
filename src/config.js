@@ -17,6 +17,5 @@ export const config = {
   clientId: process.env.DISCORD_CLIENT_ID,
   guildId: process.env.DISCORD_GUILD_ID,
   welcomeChannelId: process.env.WELCOME_CHANNEL_ID || "",
-  welcomeMessage:
-    process.env.WELCOME_MESSAGE || "Welcome {user} to {server}!"
+  welcomeImageUrl: process.env.WELCOME_IMAGE_URL || ""
 };
