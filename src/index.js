@@ -40,15 +40,12 @@ client.on(Events.InteractionCreate, interaction => {
 
 client.on(Events.GuildMemberAdd, async member => {
   const settings = guildSettings(member.guild.id);
+  const welcomeChannelId =
+    settings.welcomeChannelId || config.welcomeChannelId;
 
-  if (!settings.welcomeChannelId || !config.welcomeImageUrl) {
-    return;
-  }
+  if (!welcomeChannelId || !config.welcomeImageUrl) return;
 
-  const channel = member.guild.channels.cache.get(
-    settings.welcomeChannelId
-  );
-
+  const channel = member.guild.channels.cache.get(welcomeChannelId);
   if (!channel?.isTextBased()) return;
 
   try {
