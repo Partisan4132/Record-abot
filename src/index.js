@@ -8,6 +8,7 @@ import {
 import { commands, handleCommand } from "./commands.js";
 import { config } from "./config.js";
 import { guildSettings } from "./store.js";
+import { createWelcomeImage } from "./welcome-image.js";
 
 const client = new Client({
   intents: [
@@ -40,7 +41,9 @@ client.on(Events.InteractionCreate, interaction => {
 client.on(Events.GuildMemberAdd, async member => {
   const settings = guildSettings(member.guild.id);
 
-  if (!settings.welcomeChannelId) return;
+  if (!settings.welcomeChannelId || !config.welcomeImageUrl) {
+    return;
+  }
 
   const channel = member.guild.channels.cache.get(
     settings.welcomeChannelId
@@ -48,13 +51,27 @@ client.on(Events.GuildMemberAdd, async member => {
 
   if (!channel?.isTextBased()) return;
 
-  await channel
-    .send(
-      (settings.welcomeMessage || config.welcomeMessage)
-        .replace("{user}", `<@${member.id}>`)
-        .replace("{server}", member.guild.name)
-    )
-    .catch(() => {});
+  try {
+    const image = await createWelcomeImage({
+      backgroundUrl: config.welcomeImageUrl,
+      avatarUrl: member.user.displayAvatarURL({
+        extension: "png",
+        size: 256
+      }),
+      username: member.user.username
+    });
+
+    await channel.send({
+      files: [
+        {
+          attachment: image,
+          name: "welcome.png"
+        }
+      ]
+    });
+  } catch (error) {
+    console.error("Welcome image failed:", error);
+  }
 });
 
 const rest = new REST({ version: "10" }).setToken(config.token);
